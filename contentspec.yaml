@@ -1,0 +1,166 @@
+# We only support version 2.0.
+version: 2.0
+
+# Default locale code of the content ,formatted as languageCode-countryCode.
+defaultLocaleCode: en-US
+
+# A list of all of the supported locale codes, formatted as languageCode-countryCode.
+localeCodes:
+  - en-US
+  
+# A dictionary of arbitrary parameters that can be referenced in the workshop guide
+# using the params directive.
+# params:
+#   key1: value1
+#   key2: 5
+
+# List of links to display in the workshop guide. Will be rendered on the left hand side navigation menu.
+additionalLinks:
+  - title: AWS Documentation Homepage
+    link: https://docs.aws.amazon.com/
+
+awsAccountConfig:
+  # A list of valid account sources that are compatible for this content.
+  # Only the following values are accepted:
+  #   - `WorkshopStudio`: Accounts will be provisioned for the event by Workshop Studio.
+  #   - `CustomerProvided`: Customer is responsible for using their own accounts.
+  # Note: An event can be configured to have a mix of values mentioned above.
+  accountSources: 
+    - WorkshopStudio
+    - CustomerProvided
+
+  # List of valid IAM service linked roles that need to be provisioned for accounts provisioned for this event.
+  # Service linked roles will be automatically created by Workshop Studio when provisioning accounts.
+  # serviceLinkedRoles: 
+  #   - appsync.amazonaws.com
+
+  # The following configuration is specific to the ParticipantRole's scoped permissions.
+  # This role is assumed by Participants when accessing an account provisioned by Workshop Studio.
+  participantRole: 
+
+    # List of paths to files containing valid IAM policies that are to be attached to the account's ParticipantRole.
+    # Paths need to be relative to the root of the content's repository and must be located in the `static/` directory.
+    # Note: At this moment, only IAM policies defined in JSON format are supported.
+    # iamPolicies: 
+    #   - static/iam_policy.json
+
+    # List of valid IAM managed policies to be attached to the account's ParticipantRole. Only AWS managed policies are 
+    # supported at this moment (https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies)
+    managedPolicies: 
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+
+    # List of valid trusted principals to be referenced in the ParticipantRole's trust policy
+    trustedPrincipals:
+      # List of AWS service principals
+      service: 
+        - ec2.amazonaws.com
+
+  # If set to `true`, an EC2 KeyPair called `ws-default-keypair` will be created in the AWS Account and the private key material
+  # will be made available to the Participant via the Participant APIs and Participant interface.
+  # ec2KeyPair: true/false (default false)
+
+  # Defines a set of accessible and deployable regions for events leveraging this content.
+  regionConfiguration:
+
+    # The minimum number of regions an event operator must choose. Valid range: 1 to 3
+    minAccessibleRegions: 1
+
+    # The maximum number of regions an event operator can choose. Valid range: 1 to 3
+    maxAccessibleRegions: 1
+    
+    # Regions defined under `accessibleRegions` are regions that can be made accessible to Participants.
+    # Note: No resources will be deployed to these regions by Workshop Studio.
+    # Note: Although all keys below are optional, you must define at least one of the three keys.
+    accessibleRegions: 
+
+      # [OPTIONAL] Set of regions an event's provisioned account must have access to. 
+      # required:
+      #   - us-east-1
+
+      # [OPTIONAL] Set of regions that should be accessible by an event's provisioned account as a recommendation.
+      recommended:
+        - us-east-1
+        - us-east-2
+        - us-west-2
+        - ap-south-1
+        - ap-southeast-1
+        - ap-southeast-2
+        - ap-northeast-1
+        - eu-central-1
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+        - eu-north-1
+    
+      # [OPTIONAL] Set of regions that event operators' could allow access to by event's Participants.
+      # optional:
+      #   - us-east-2
+      #   - us-west-2
+    
+    # Set of regions where the configured CloudFormation templates will be deployed to.
+    # Note: Only 1 deployment regions is supported currently.
+    # Note: Although all keys below are optional, you must define at least one of the three keys.
+    # [OPTIONAL] if no CFTs are provided under `cloudformationTemplates`.
+    deployableRegions:
+
+      # [OPTIONAL] Set of regions an event's cloudformation templates should be deployed to.
+      # Note: Only 1 deployment regions is supported currently. Meaning no more than 1 region can be required.
+      # required:
+      #   - us-east-1
+
+      # [OPTIONAL] Set of regions an event's cloudformation templates should be deployed to as a recommendation.
+      recommended:
+        - us-east-1
+        - us-east-2
+        - us-west-2
+        - ap-south-1
+        - ap-southeast-1
+        - ap-southeast-2
+        - ap-northeast-1
+        - eu-central-1
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+        - eu-north-1
+    
+      # [OPTIONAL] Set of regions an event's cloudformation templates could be deployed to as optional.
+      # optional:
+      #   - us-east-2
+      #   - us-west-2
+
+infrastructure:
+
+  # A list of CloudFormation templates (CFTs) that are present in the content's repository. 
+  # These CFTs will be used by Workshop Studio's provisioning process and will be deployed to AWS accounts.
+  # Note: The order of CFTs defined here will be the same order that Workshop Studio will deploy them to
+  # the AWS accounts. Make sure the CFTs are in the correct order if some depend on others.
+  cloudformationTemplates:
+
+      # The template's location relative to the root of the content's repo. 
+      # Note: Templates must be located in the `static/` directory
+    - templateLocation: static/code-family-workshop.yaml
+
+      # Friendly name for the corresponding cloudformation template.
+      label: CodeFamilyWorkshopBootstrap
+
+      # [OPTIONAL] List of parameters defined within the corresponding stack alongside
+      # the value that should be used for them. Any CloudFormation parameter that does not
+      # have a default value should be defined here with a default value.
+      parameters:
+
+          # The parameter name present in the corresponding CFT
+        # - templateParameter: MyEnvVar
+        #   # [OPTIONAL] The parameter's default value to be used for this parameter
+        #   defaultValue: Hello, world!
+
+          # Workshop Studio supports "Magic Variables" in the `defaultValue` of CFT parameters
+        - templateParameter: Cloud9OwnerRole
+          defaultValue: "{{.ParticipantAssumedRoleArn}}"
+        # - templateParameter: AssetsBucketName
+        #   defaultValue: "{{.AssetsBucketName}}"
+        # - templateParameter: AssetsBucketPrefix
+        #   defaultValue: "{{.AssetsBucketPrefix}}"
+        # - templateParameter: WorkshopInstanceType
+        #   defaultValue: "t3.medium"
+        # - templateParameter: WorkshopInstanceVolumeSize
+        #   defaultValue: 50
